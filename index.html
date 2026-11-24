@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Korea Import Margin Check</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: harbour manifest — a cost waterfall up top, condition panels in a 2x2 grid, then the model ledger and stock list. */
+:root{
+  --bg:#f3f6f9; --surface:#ffffff; --ink:#0e1a28; --muted:#566676; --line:#d8e0e8;
+  --accent:#003399; --accent-soft:#e3e9fb; --pos:#0f7a55; --pos-soft:#dcf2e8; --neg:#b2433a; --neg-soft:#f8e3e0; --ship:#5a7896; --duty:#8a6d3b; --trans:#6b5b95;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1118; --surface:#111a24; --ink:#e5ecf3; --muted:#93a4b6; --line:#223142;
+  --accent:#7d96ff; --accent-soft:#1b2747; --pos:#45c495; --pos-soft:#123228; --neg:#e57d72; --neg-soft:#3a1d1a; --ship:#7f9cba; --duty:#c7a465; --trans:#a796d6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1118; --surface:#111a24; --ink:#e5ecf3; --muted:#93a4b6; --line:#223142;
+  --accent:#7d96ff; --accent-soft:#1b2747; --pos:#45c495; --pos-soft:#123228; --neg:#e57d72; --neg-soft:#3a1d1a; --ship:#7f9cba; --duty:#c7a465; --trans:#a796d6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;font-variant-numeric:tabular-nums}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;letter-spacing:.02em}
+.plate{display:inline-flex;align-items:stretch;border:2px solid var(--ink);border-radius:5px;overflow:hidden;font-family:var(--display);font-weight:700;font-size:13px;line-height:1}
+.plate .eu{background:#003399;color:#ffd400;padding:5px 5px 3px;font-size:10px;display:flex;align-items:flex-end}
+.plate .txt{padding:5px 8px;background:var(--surface);color:var(--ink)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:transparent;color:var(--muted);font:600 13px var(--body);padding:6px 12px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.lang button:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hero{padding-block:36px 8px;display:grid;gap:18px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,4.6vw,46px);line-height:1.08;margin:0;text-wrap:balance;max-width:20ch}
+.lede{color:var(--muted);max-width:66ch;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.kpi{background:var(--surface);padding:16px 18px;min-width:0}
+.kpi .v{font-family:var(--display);font-weight:800;font-size:clamp(22px,3vw,30px);line-height:1.1}
+.kpi .l{font-size:12.5px;color:var(--muted);margin-top:4px}
+.v.pos{color:var(--pos)}
+section{padding-block:34px 0}
+h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 6px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 16px;max-width:72ch}
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:16px}
+.inputs{display:flex;flex-wrap:wrap;gap:14px}
+.field{display:grid;gap:4px;font-size:12.5px;color:var(--muted);font-weight:600}
+.field input,.field select{font:500 15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;width:160px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:10px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:12.5px;background:var(--bg)}
+td.l,th.l{text-align:left}
+tr:last-child td{border-bottom:0}
+.hl{background:var(--accent-soft)}
+.gap-pos{color:var(--pos);font-weight:700}
+.gap-neg{color:var(--neg);font-weight:700}
+.wf{display:grid;gap:8px}
+.wfrow{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;align-items:center;font-size:12.5px;color:var(--muted)}
+.bar{display:flex;height:26px;border-radius:5px;overflow:hidden;background:var(--bg)}
+.bar span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.filters .field select{width:150px}
+.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.panel h3{font-family:var(--display);font-size:16px;margin:0 0 10px}
+.prow{display:grid;grid-template-columns:96px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:13px;padding:5px 0}
+.prow .lab{color:var(--ink)}
+.prow .lab small{display:block;color:var(--muted);font-size:11.5px}
+.track{position:relative;height:18px}
+.track .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--muted);opacity:.5}
+.track .fill{position:absolute;top:0;bottom:0;border-radius:3px}
+.prow .val{text-align:right;font-weight:600}
+.share{font-size:11.5px;color:var(--muted);font-weight:500}
+.btn{font:600 13px var(--body);border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn:hover{background:var(--accent-soft)}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px}
+.pill.pos{background:var(--pos-soft);color:var(--pos)}
+.pill.neg{background:var(--neg-soft);color:var(--neg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.car{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;min-width:0}
+.car .t{font-weight:600}
+.car .m{font-size:12.5px;color:var(--muted)}
+.car .nums{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:13px}
+.car .nums span:nth-child(even){text-align:right}
+.car a{color:var(--accent);font-weight:600;font-size:13px;text-decoration:none}
+.car a:hover{text-decoration:underline}
+.notes{font-size:13px;color:var(--muted);display:grid;gap:8px;max-width:80ch}
+.notes b{color:var(--ink)}
+.empty{color:var(--muted);padding:16px}
+.muted{color:var(--muted)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.panels{grid-template-columns:minmax(0,1fr)}.filters{position:static}.wfrow{grid-template-columns:84px minmax(0,1fr)}}
+@media (prefers-reduced-motion:no-preference){.track .fill,.bar span{transition:width .35s ease,left .35s ease}}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="plate"><span class="eu">D</span><span class="txt">KR → DE</span></span> Mangocar</div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="lang-de" type="button" aria-pressed="true">DE</button>
+      <button id="lang-en" type="button" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow" data-i="eyebrow">Import aus Korea · Datenstand</div>
+    <h1 data-i="h1">Wie viel bringt ein Gebrauchtwagen aus Korea mehr?</h1>
+    <p class="lede" data-i="lede">Wir haben jedes Fahrzeug im Mangocar-Bestand mit vergleichbaren Angeboten auf mobile.de verglichen: gleiches Modell, gleiches Erstzulassungsjahr, gleicher Kraftstoff, ähnliche Laufleistung. Die Kosten bis zur Zulassung in Deutschland sind eingerechnet.</p>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <section id="calc">
+    <h2 data-i="calcH">So rechnen wir</h2>
+    <p class="sub" data-i="calcSub">Einkaufspreis in Korea plus Seefracht, 10 % Zoll und Transport mit TÜV ergibt die Endkosten. Die Differenz zum deutschen Marktpreis ist Ihr Mehrertrag. Probieren Sie eigene Werte aus.</p>
+    <div class="calc">
+      <div class="inputs">
+        <label class="field"><span data-i="inUsd">Preis Korea (USD)</span><input id="in-usd" type="number" min="0" step="100" value="5222"></label>
+        <label class="field"><span data-i="inDe">Marktpreis Deutschland (EUR)</span><input id="in-de" type="number" min="0" step="100" value="12990"></label>
+      </div>
+      <div class="tblwrap"><table id="calc-table"></table></div>
+      <div class="wf" id="wf"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section id="conditions">
+    <h2 data-i="condH">Mehrertrag nach Fahrzeugzustand</h2>
+    <p class="sub" data-i="condSub">Median des Mehrertrags pro Fahrzeug je Gruppe. Der Anteil zeigt, wie viele Fahrzeuge der Gruppe nach allen Kosten unter dem deutschen Marktpreis liegen.</p>
+    <div class="filters" id="filters">
+      <label class="field"><span data-i="fMake">Marke</span><select id="f-make"></select></label>
+      <label class="field"><span data-i="fFuel">Kraftstoff</span><select id="f-fuel"></select></label>
+      <label class="field"><span data-i="fYear">Erstzulassung ab</span><select id="f-year"></select></label>
+      <label class="field"><span data-i="fKm">Laufleistung bis</span><select id="f-km"></select></label>
+      <label class="field"><span data-i="fBudget">Endkosten bis</span><select id="f-budget"></select></label>
+    </div>
+    <div class="panels" id="panels"></div>
+  </section>
+
+  <section id="models">
+    <h2 data-i="modH">Modelle mit dem höchsten Mehrertrag</h2>
+    <p class="sub" data-i="modSub">Modell, Erstzulassungsjahr und Kraftstoff mit mindestens drei Fahrzeugen im Bestand, sortiert nach dem Median-Mehrertrag. Es gelten die Filter oben.</p>
+    <div class="tblwrap"><table id="model-table"></table></div>
+    <div style="margin-top:10px"><button class="btn" id="more" type="button" data-i="more">Mehr anzeigen</button></div>
+  </section>
+
+  <section id="stock">
+    <h2 data-i="stockH">Aktuelle Fahrzeuge mit dem höchsten Mehrertrag</h2>
+    <p class="sub" data-i="stockSub">Einzelne Fahrzeuge aus dem Mangocar-Bestand. Der Link öffnet das Inserat mit Fotos und Prüfbericht.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="method">
+    <h2 data-i="methH">Methode und Annahmen</h2>
+    <div class="notes" id="notes"></div>
+  </section>
+</div>
+
+<script>
+const T={
+ de:{eyebrow:"Import aus Korea · Datenstand ",h1:"Wie viel bringt ein Gebrauchtwagen aus Korea mehr?",
+  lede:"Wir haben jedes Fahrzeug im Mangocar-Bestand mit vergleichbaren Angeboten auf mobile.de verglichen: gleiches Modell, gleiches Erstzulassungsjahr, gleicher Kraftstoff, ähnliche Laufleistung. Die Kosten bis zur Zulassung in Deutschland sind eingerechnet.",
+  k1:"Fahrzeuge verglichen",k2:"liegen nach allen Kosten unter dem deutschen Marktpreis",k3:"Median-Mehrertrag dieser Fahrzeuge",k4:"Mehrertrag im oberen Viertel (ab)",
+  calcH:"So rechnen wir",calcSub:"Einkaufspreis in Korea plus Seefracht, 10 % Zoll und Transport mit TÜV ergibt die Endkosten. Die Differenz zum deutschen Marktpreis ist Ihr Mehrertrag. Probieren Sie eigene Werte aus.",
+  inUsd:"Preis Korea (USD)",inDe:"Marktpreis Deutschland (EUR)",
+  cUsd:"Preis Korea (USD)",cEur:"Preis Korea (EUR)",cShip:"Seefracht (RoRo)",cDuty:"Zoll (10 %)",cTrans:"Transport + TÜV",cFinal:"Endkosten",cDe:"Marktpreis DE",cGap:"Mehrertrag",
+  wfK:"Kosten",wfD:"Marktpreis DE",lgKr:"Fahrzeug Korea",lgShip:"Seefracht",lgDuty:"Zoll",lgTrans:"Transport + TÜV",lgGap:"Mehrertrag",
+  condH:"Mehrertrag nach Fahrzeugzustand",condSub:"Median des Mehrertrags pro Fahrzeug je Gruppe. Der Anteil zeigt, wie viele Fahrzeuge der Gruppe nach allen Kosten unter dem deutschen Marktpreis liegen.",
+  fMake:"Marke",fFuel:"Kraftstoff",fYear:"Erstzulassung ab",fKm:"Laufleistung bis",fBudget:"Endkosten bis",all:"Alle",
+  pAge:"Erstzulassung",pKm:"Laufleistung",pPrice:"Endkosten pro Fahrzeug",pFuel:"Kraftstoff",cars:"Fzg.",ofCars:"positiv",
+  modH:"Modelle mit dem höchsten Mehrertrag",modSub:"Modell, Erstzulassungsjahr und Kraftstoff mit mindestens drei Fahrzeugen im Bestand, sortiert nach dem Median-Mehrertrag. Es gelten die Filter oben.",
+  mModel:"Modell",mYear:"EZ",mFuel:"Kraftstoff",mN:"Fahrzeuge",mFinal:"Endkosten (Median)",mDe:"Marktpreis DE (Median)",mGap:"Mehrertrag (Median)",mShare:"Anteil positiv",more:"Mehr anzeigen",less:"Weniger anzeigen",
+  stockH:"Aktuelle Fahrzeuge mit dem höchsten Mehrertrag",stockSub:"Einzelne Fahrzeuge aus dem Mangocar-Bestand. Der Link öffnet das Inserat mit Fotos und Prüfbericht.",
+  sKm:"Laufleistung",sFinal:"Endkosten",sDe:"Marktpreis DE",sGap:"Mehrertrag",sComps:"Vergleichsangebote",open:"Inserat ansehen",
+  none:"Für diese Auswahl gibt es keine Fahrzeuge.",
+  methH:"Methode und Annahmen",
+  fuels:{Petrol:"Benzin",Diesel:"Diesel",Hybrid:"Hybrid",Electric:"Elektro"},
+  notes:d=>[
+   `<b>Datenquellen.</b> Mangocar-Bestand und mobile.de-Angebote, abgerufen am ${d.date}. Verglichen wurden ${fmtN(d.cars.length)} Fahrzeuge mit ${fmtN(d.deListings)} deutschen Angeboten.`,
+   `<b>Marktpreis Deutschland.</b> Median der Angebotspreise auf mobile.de für dasselbe Modell, dasselbe Erstzulassungsjahr und denselben Kraftstoff mit ähnlicher Laufleistung (±30 %, unter 20.000 km bis 40.000 km). Mindestens vier Vergleichsangebote; Ausreißer werden entfernt. Ausstattung und Motorvariante können abweichen. Fahrzeuge, deren deutscher Vergleichspreis mehr als 75 % über oder unter den Endkosten liegt, sind als mögliche Ausstattungsabweichung nicht enthalten.`,
+   `<b>Kosten.</b> USD→EUR ${String(d.cost.usdEur).replace('.',',')}; Seefracht RoRo ${fmtE(d.cost.ship)}; Zoll 10 % auf Fahrzeugpreis plus Fracht; Transport und TÜV ${fmtE(d.cost.trans)}.`,
+   `<b>Nicht enthalten.</b> Einfuhrumsatzsteuer (19 %, für vorsteuerabzugsberechtigte Händler erstattbar), Umsatzsteuer beim Weiterverkauf, Zulassung, Aufbereitung und Finanzierung. Die deutschen Preise sind Angebotspreise inklusive Umsatzsteuer, soweit ausgewiesen.`,
+   `<b>Hinweis.</b> Alle Werte sind Schätzungen auf Basis öffentlicher Angebote und keine Zusage eines Verkaufspreises.`]},
+ en:{eyebrow:"Import from Korea · Data as of ",h1:"How much more does a used car from Korea earn?",
+  lede:"We compared every car in Mangocar's stock with similar listings on mobile.de: same model, same registration year, same fuel, similar mileage. All costs up to registration in Germany are included.",
+  k1:"cars compared",k2:"cost less than the German market price after all costs",k3:"median extra margin of those cars",k4:"extra margin in the top quarter (from)",
+  calcH:"How we calculate",calcSub:"Purchase price in Korea plus sea freight, 10% customs duty and transport with TÜV gives the final cost. The difference to the German market price is your extra margin. Try your own figures.",
+  inUsd:"Price in Korea (USD)",inDe:"German market price (EUR)",
+  cUsd:"Price Korea (USD)",cEur:"Price Korea (EUR)",cShip:"Shipping (RoRo)",cDuty:"Duty (10%)",cTrans:"Transport + TÜV",cFinal:"Final cost",cDe:"German price",cGap:"Extra margin",
+  wfK:"Cost",wfD:"German price",lgKr:"Car in Korea",lgShip:"Shipping",lgDuty:"Duty",lgTrans:"Transport + TÜV",lgGap:"Extra margin",
+  condH:"Extra margin by vehicle condition",condSub:"Median extra margin per car in each group. The share shows how many cars in the group cost less than the German market price after all costs.",
+  fMake:"Make",fFuel:"Fuel",fYear:"Registered from",fKm:"Mileage up to",fBudget:"Final cost up to",all:"All",
+  pAge:"First registration",pKm:"Mileage",pPrice:"Final cost per car",pFuel:"Fuel",cars:"cars",ofCars:"positive",
+  modH:"Models with the highest extra margin",modSub:"Model, registration year and fuel with at least three cars in stock, sorted by median extra margin. The filters above apply.",
+  mModel:"Model",mYear:"Reg.",mFuel:"Fuel",mN:"Cars",mFinal:"Final cost (median)",mDe:"German price (median)",mGap:"Extra margin (median)",mShare:"Share positive",more:"Show more",less:"Show less",
+  stockH:"Cars in stock with the highest extra margin",stockSub:"Individual cars from Mangocar's stock. The link opens the listing with photos and inspection report.",
+  sKm:"Mileage",sFinal:"Final cost",sDe:"German price",sGap:"Extra margin",sComps:"comparable listings",open:"View listing",
+  none:"No cars match this selection.",
+  methH:"Method and assumptions",
+  fuels:{Petrol:"Petrol",Diesel:"Diesel",Hybrid:"Hybrid",Electric:"Electric"},
+  notes:d=>[
+   `<b>Data sources.</b> Mangocar stock and mobile.de listings, retrieved on ${d.date}. ${fmtN(d.cars.length)} cars were compared with ${fmtN(d.deListings)} German listings.`,
+   `<b>German market price.</b> Median asking price on mobile.de for the same model, registration year and fuel with similar mileage (±30%; below 20,000 km up to 40,000 km). At least four comparable listings; outliers removed. Trim and engine variant can differ. Cars whose German comparable price is more than 75% above or below the final cost are left out as a likely equipment mismatch.`,
+   `<b>Costs.</b> USD→EUR ${d.cost.usdEur}; RoRo sea freight ${fmtE(d.cost.ship)}; 10% duty on car price plus freight; transport and TÜV ${fmtE(d.cost.trans)}.`,
+   `<b>Not included.</b> Import VAT (19%, recoverable for VAT-registered dealers), VAT on resale, registration, reconditioning and financing. German prices are asking prices including VAT where shown.`,
+   `<b>Note.</b> All figures are estimates based on public listings and are not a promise of a sale price.`]}
+};
+let L='de',D=null,showAll=false;
+try{const s=localStorage.getItem('kr-de-lang');if(s==='en'||s==='de')L=s}catch(e){}
+const loc=()=>L==='de'?'de-DE':'en-GB';
+function fmtN(n){return Math.round(n).toLocaleString(loc())}
+function fmtE(n){return (n<0?'−':'')+'€'+Math.abs(Math.round(n)).toLocaleString(loc())}
+function fmtSigned(n){return (n>0?'+':n<0?'−':'')+'€'+Math.abs(Math.round(n)).toLocaleString(loc())}
+function fmtU(n){return '$'+Math.round(n).toLocaleString(loc())}
+function pct(x){return Math.round(x*100)+' %'.replace(' ',L==='de'?' ':'')}
+function med(a){if(!a.length)return NaN;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function q(a,p){if(!a.length)return NaN;const s=[...a].sort((x,y)=>x-y),pos=(s.length-1)*p,lo=Math.floor(pos),hi=Math.ceil(pos);return s[lo]+(s[hi]-s[lo])*(pos-lo)}
+function cost(usd,c){const eur=usd*c.usdEur,duty=(eur+c.ship)*c.duty;return {eur,ship:c.ship,duty,trans:c.trans,final:eur+c.ship+duty+c.trans}}
+const $=id=>document.getElementById(id);
+
+function applyText(){
+  const t=T[L];document.documentElement.lang=L;
+  document.querySelectorAll('[data-i]').forEach(el=>{const k=el.dataset.i;if(t[k]!==undefined&&typeof t[k]==='string')el.textContent=t[k]});
+  if(D)document.querySelector('[data-i="eyebrow"]').textContent=t.eyebrow+D.date;
+  $('lang-de').setAttribute('aria-pressed',L==='de');$('lang-en').setAttribute('aria-pressed',L==='en');
+}
+function renderCalc(){
+  const t=T[L],c=D?D.cost:{usdEur:.92,ship:2100,duty:.1,trans:1500};
+  const usd=+$('in-usd').value||0,de=+$('in-de').value||0,k=cost(usd,c),gap=de-k.final;
+  $('calc-table').innerHTML=`<thead><tr><th>${t.cUsd}</th><th>${t.cEur}</th><th>${t.cShip}</th><th>${t.cDuty}</th><th>${t.cTrans}</th><th class="hl">${t.cFinal}</th><th>${t.cDe}</th><th class="hl">${t.cGap}</th></tr></thead>
+   <tbody><tr><td>${fmtU(usd)}</td><td>${fmtE(k.eur)}</td><td>${fmtE(k.ship)}</td><td>${fmtE(k.duty)}</td><td>${fmtE(k.trans)}</td><td class="hl"><b>${fmtE(k.final)}</b></td><td>${fmtE(de)}</td><td class="hl ${gap>=0?'gap-pos':'gap-neg'}">${fmtSigned(gap)}</td></tr></tbody>`;
+  const max=Math.max(k.final,de,1),w=v=>(Math.max(0,v)/max*100).toFixed(2)+'%';
+  $('wf').innerHTML=`<div class="wfrow"><span>${t.wfK}</span><div class="bar"><span style="width:${w(k.eur)};background:var(--accent)"></span><span style="width:${w(k.ship)};background:var(--ship)"></span><span style="width:${w(k.duty)};background:var(--duty)"></span><span style="width:${w(k.trans)};background:var(--trans)"></span></div></div>
+   <div class="wfrow"><span>${t.wfD}</span><div class="bar"><span style="width:${w(Math.min(de,k.final))};background:var(--line)"></span><span style="width:${w(gap)};background:var(--pos)"></span></div></div>`;
+  $('legend').innerHTML=[['var(--accent)',t.lgKr],['var(--ship)',t.lgShip],['var(--duty)',t.lgDuty],['var(--trans)',t.lgTrans],['var(--pos)',t.lgGap]].map(([c2,l])=>`<span><i style="background:${c2}"></i>${l}</span>`).join('');
+}
+function enrich(){D.rows=D.cars.map(r=>{const k=cost(r[5],D.cost);return {mk:r[0],mo:r[1],y:r[2],f:r[3],km:r[4]*1000,usd:r[5],de:r[6],n:r[7],code:r[8],final:k.final,gap:r[6]-k.final}})}
+function fillFilters(){
+  const t=T[L],keep=id=>$(id).value;
+  const mv=keep('f-make'),fv=keep('f-fuel'),yv=keep('f-year'),kv=keep('f-km'),bv=keep('f-budget');
+  const cnt={};D.rows.forEach(r=>cnt[r.mk]=(cnt[r.mk]||0)+1);
+  const mk=D.makes.map((m,i)=>[i,m,cnt[i]||0]).filter(x=>x[2]>0).sort((a,b)=>b[2]-a[2]);
+  $('f-make').innerHTML=`<option value="">${t.all}</option>`+mk.map(([i,m,n])=>`<option value="${i}">${m} (${fmtN(n)})</option>`).join('');
+  $('f-fuel').innerHTML=`<option value="">${t.all}</option>`+D.fuels.map((f,i)=>`<option value="${i}">${t.fuels[f]}</option>`).join('');
+  $('f-year').innerHTML=`<option value="">${t.all}</option>`+[2014,2016,2018,2020,2022,2024].map(y=>`<option value="${y}">${y}</option>`).join('');
+  $('f-km').innerHTML=`<option value="">${t.all}</option>`+[30000,60000,100000,150000].map(k=>`<option value="${k}">${fmtN(k)} km</option>`).join('');
+  $('f-budget').innerHTML=`<option value="">${t.all}</option>`+[10000,20000,30000,50000,80000].map(b=>`<option value="${b}">${fmtE(b)}</option>`).join('');
+  $('f-make').value=mv;$('f-fuel').value=fv;$('f-year').value=yv;$('f-km').value=kv;$('f-budget').value=bv;
+}
+function filtered(){
+  const m=$('f-make').value,f=$('f-fuel').value,y=+$('f-year').value||0,k=+$('f-km').value||Infinity,b=+$('f-budget').value||Infinity;
+  return D.rows.filter(r=>(m===''||r.mk==m)&&(f===''||r.f==f)&&r.y>=y&&r.km<=k&&r.final<=b);
+}
+function renderKpis(rows){
+  const t=T[L],pos=rows.filter(r=>r.gap>0),g=pos.map(r=>r.gap);
+  $('kpis').innerHTML=[[fmtN(rows.length),t.k1,''],[rows.length?pct(pos.length/rows.length):'–',t.k2,''],[g.length?fmtSigned(med(g)):'–',t.k3,'pos'],[g.length?fmtSigned(q(g,.75)):'–',t.k4,'pos']]
+   .map(([v,l,c])=>`<div class="kpi"><div class="v ${c}">${v}</div><div class="l">${l}</div></div>`).join('');
+}
+function panel(title,groups){
+  const vals=groups.filter(g=>g.rows.length).map(g=>med(g.rows.map(r=>r.gap)));
+  const mx=Math.max(1,...vals.map(Math.abs)),hasNeg=vals.some(v=>v<0),zero=hasNeg?50:0,scale=hasNeg?50:100;
+  const t=T[L];
+  return `<div class="panel"><h3>${title}</h3>`+groups.map(g=>{
+    const n=g.rows.length;if(!n)return `<div class="prow"><span class="lab">${g.label}</span><span class="muted" style="font-size:12px">–</span><span></span></div>`;
+    const v=med(g.rows.map(r=>r.gap)),share=g.rows.filter(r=>r.gap>0).length/n,w=Math.abs(v)/mx*scale;
+    const left=v>=0?zero:zero-w;
+    return `<div class="prow"><span class="lab">${g.label}<small>${fmtN(n)} ${t.cars}</small></span><div class="track">${hasNeg?`<span class="zero" style="left:${zero}%"></span>`:''}<span class="fill" style="left:${left}%;width:${w}%;background:${v>=0?'var(--pos)':'var(--neg)'}"></span></div><span class="val ${v>=0?'gap-pos':'gap-neg'}">${fmtSigned(v)}<div class="share">${pct(share)} ${t.ofCars}</div></span></div>`}).join('')+`</div>`;
+}
+function renderPanels(rows){
+  const t=T[L],by=(fn,defs)=>defs.map(([label,test])=>({label,rows:rows.filter(r=>test(fn(r)))}));
+  const age=by(r=>r.y,[['2024–2026',y=>y>=2024],['2021–2023',y=>y>=2021&&y<=2023],['2018–2020',y=>y>=2018&&y<=2020],['2015–2017',y=>y>=2015&&y<=2017],['2012–2014',y=>y<=2014]]);
+  const km=by(r=>r.km,[['< 30.000',k=>k<30000],['30–60.000',k=>k>=30000&&k<60000],['60–100.000',k=>k>=60000&&k<100000],['100–150.000',k=>k>=100000&&k<150000],['≥ 150.000',k=>k>=150000]]);
+  const pr=by(r=>r.final,[['< €10.000',v=>v<10000],['€10–20.000',v=>v>=10000&&v<20000],['€20–35.000',v=>v>=20000&&v<35000],['€35–50.000',v=>v>=35000&&v<50000],['≥ €50.000',v=>v>=50000]]);
+  const fu=D.fuels.map((f,i)=>({label:t.fuels[f],rows:rows.filter(r=>r.f===i)}));
+  const fixKm=a=>a.map(g=>({...g,label:L==='de'?g.label:g.label.replace(/\./g,',')}));
+  $('panels').innerHTML=panel(t.pAge,age)+panel(t.pKm+' (km)',fixKm(km))+panel(t.pPrice,fixKm(pr))+panel(t.pFuel,fu);
+}
+function renderModels(rows){
+  const t=T[L],g={};rows.forEach(r=>{const k=r.mo+'|'+r.y+'|'+r.f;(g[k]=g[k]||[]).push(r)});
+  let list=Object.values(g).filter(a=>a.length>=3).map(a=>({mk:a[0].mk,mo:a[0].mo,y:a[0].y,f:a[0].f,n:a.length,fin:med(a.map(r=>r.final)),de:med(a.map(r=>r.de)),gap:med(a.map(r=>r.gap)),share:a.filter(r=>r.gap>0).length/a.length}));
+  list.sort((a,b)=>b.gap-a.gap);const shown=showAll?list.slice(0,100):list.slice(0,15);
+  $('model-table').innerHTML=`<thead><tr><th class="l">${t.mModel}</th><th>${t.mYear}</th><th class="l">${t.mFuel}</th><th>${t.mN}</th><th>${t.mFinal}</th><th>${t.mDe}</th><th>${t.mGap}</th><th>${t.mShare}</th></tr></thead><tbody>`+
+   (shown.length?shown.map(x=>`<tr><td class="l">${D.makes[x.mk]} ${D.models[x.mo]}</td><td>${x.y}</td><td class="l">${t.fuels[D.fuels[x.f]]}</td><td>${x.n}</td><td>${fmtE(x.fin)}</td><td>${fmtE(x.de)}</td><td class="${x.gap>=0?'gap-pos':'gap-neg'}">${fmtSigned(x.gap)}</td><td><span class="pill ${x.share>=.5?'pos':'neg'}">${pct(x.share)}</span></td></tr>`).join(''):`<tr><td class="l empty" colspan="8">${t.none}</td></tr>`)+`</tbody>`;
+  $('more').hidden=list.length<=15;$('more').textContent=showAll?t.less:t.more;
+}
+function renderCards(rows){
+  const t=T[L],top=[...rows].filter(r=>r.gap>0).sort((a,b)=>b.gap-a.gap).slice(0,24);
+  $('cards').innerHTML=top.length?top.map(r=>`<div class="car"><div><div class="t">${D.makes[r.mk]} ${D.models[r.mo]}</div><div class="m">${r.y} · ${t.fuels[D.fuels[r.f]]} · ${fmtN(r.km)} km</div></div>
+   <div class="nums"><span>${t.sFinal}</span><span>${fmtE(r.final)}</span><span>${t.sDe}</span><span>${fmtE(r.de)}</span><span>${t.sGap}</span><span class="gap-pos">${fmtSigned(r.gap)}</span></div>
+   <div class="m">${r.n} ${t.sComps} · ${fmtU(r.usd)} Korea</div><a href="https://mangoworldcar.com/${L}/car-detail/${r.code}" target="_blank" rel="noopener">${t.open} →</a></div>`).join(''):`<div class="empty">${t.none}</div>`;
+}
+function renderNotes(){$('notes').innerHTML=T[L].notes(D).map(s=>`<p style="margin:0">${s}</p>`).join('')}
+function renderAll(){applyText();renderCalc();if(!D)return;const rows=filtered();renderKpis(rows);renderPanels(rows);renderModels(rows);renderCards(rows);renderNotes()}
+function setLang(l){L=l;try{localStorage.setItem('kr-de-lang',l)}catch(e){}if(D)fillFilters();renderAll()}
+$('lang-de').onclick=()=>setLang('de');$('lang-en').onclick=()=>setLang('en');
+['in-usd','in-de'].forEach(id=>$(id).addEventListener('input',renderCalc));
+['f-make','f-fuel','f-year','f-km','f-budget'].forEach(id=>$(id).addEventListener('change',()=>{showAll=false;renderAll()}));
+$('more').onclick=()=>{showAll=!showAll;renderModels(filtered())};
+applyText();renderCalc();
+fetch('data.json').then(r=>r.json()).then(d=>{D=d;enrich();fillFilters();renderAll()}).catch(()=>{$('kpis').innerHTML='<div class="kpi"><div class="l">Data could not be loaded.</div></div>'});
+</script>
+
+</body>
+</html>
