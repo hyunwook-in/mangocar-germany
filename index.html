@@ -90,6 +90,10 @@ tr:last-child td{border-bottom:0}
 .car .nums span:nth-child(even){text-align:right}
 .car a{color:var(--accent);font-weight:600;font-size:13px;text-decoration:none}
 .car a:hover{text-decoration:underline}
+.car .links{display:grid;gap:6px;border-top:1px solid var(--line);padding-top:8px}
+.car .kgl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.car .kgl a{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:26px;padding:0 8px;border:1px solid var(--line);border-radius:6px;font-size:12.5px}
+.car .kgl a:hover{border-color:var(--accent);text-decoration:none}
 .notes{font-size:13px;color:var(--muted);display:grid;gap:8px;max-width:80ch}
 .notes b{color:var(--ink)}
 .empty{color:var(--muted);padding:16px}
@@ -177,8 +181,8 @@ const T={
   pAge:"Erstzulassung",pKm:"Laufleistung",pPrice:"Endkosten pro Fahrzeug",pFuel:"Kraftstoff",cars:"Fzg.",ofCars:"positiv",
   modH:"Modelle mit dem höchsten Mehrertrag",modSub:"Modell, Erstzulassungsjahr und Kraftstoff mit mindestens drei Fahrzeugen im Bestand, sortiert nach dem Median-Mehrertrag. Es gelten die Filter oben.",
   mModel:"Modell",mYear:"EZ",mFuel:"Kraftstoff",mN:"Fahrzeuge",mFinal:"Endkosten (Median)",mDe:"Marktpreis DE (Median)",mGap:"Mehrertrag (Median)",mShare:"Anteil positiv",more:"Mehr anzeigen",less:"Weniger anzeigen",
-  stockH:"Aktuelle Fahrzeuge mit dem höchsten Mehrertrag",stockSub:"Einzelne Fahrzeuge aus dem Mangocar-Bestand. Der Link öffnet das Inserat mit Fotos und Prüfbericht.",
-  sKm:"Laufleistung",sFinal:"Endkosten",sDe:"Marktpreis DE",sGap:"Mehrertrag",sComps:"Vergleichsangebote",open:"Inserat ansehen",
+  stockH:"Aktuelle Fahrzeuge mit dem höchsten Mehrertrag",stockSub:"Einzelne Fahrzeuge aus dem Mangocar-Bestand. Der erste Link öffnet das Mangocar-Inserat mit Fotos und Prüfbericht, die Nummern darunter öffnen vergleichbare Angebote auf mobile.de, aus denen der deutsche Marktpreis stammt.",
+  sKm:"Laufleistung",sFinal:"Endkosten",sDe:"Marktpreis DE",sGap:"Mehrertrag",sComps:"Vergleichsangebote",open:"Inserat bei Mangocar",deLinks:"Vergleich auf mobile.de:",
   none:"Für diese Auswahl gibt es keine Fahrzeuge.",
   methH:"Methode und Annahmen",
   fuels:{Petrol:"Benzin",Diesel:"Diesel",Hybrid:"Hybrid",Electric:"Elektro"},
@@ -200,8 +204,8 @@ const T={
   pAge:"First registration",pKm:"Mileage",pPrice:"Final cost per car",pFuel:"Fuel",cars:"cars",ofCars:"positive",
   modH:"Models with the highest extra margin",modSub:"Model, registration year and fuel with at least three cars in stock, sorted by median extra margin. The filters above apply.",
   mModel:"Model",mYear:"Reg.",mFuel:"Fuel",mN:"Cars",mFinal:"Final cost (median)",mDe:"German price (median)",mGap:"Extra margin (median)",mShare:"Share positive",more:"Show more",less:"Show less",
-  stockH:"Cars in stock with the highest extra margin",stockSub:"Individual cars from Mangocar's stock. The link opens the listing with photos and inspection report.",
-  sKm:"Mileage",sFinal:"Final cost",sDe:"German price",sGap:"Extra margin",sComps:"comparable listings",open:"View listing",
+  stockH:"Cars in stock with the highest extra margin",stockSub:"Individual cars from Mangocar's stock. The first link opens the Mangocar listing with photos and inspection report; the numbers below open comparable mobile.de listings used for the German price.",
+  sKm:"Mileage",sFinal:"Final cost",sDe:"German price",sGap:"Extra margin",sComps:"comparable listings",open:"Listing on Mangocar",deLinks:"Comparable on mobile.de:",
   none:"No cars match this selection.",
   methH:"Method and assumptions",
   fuels:{Petrol:"Petrol",Diesel:"Diesel",Hybrid:"Hybrid",Electric:"Electric"},
@@ -241,7 +245,7 @@ function renderCalc(){
    <div class="wfrow"><span>${t.wfD}</span><div class="bar"><span style="width:${w(Math.min(de,k.final))};background:var(--line)"></span><span style="width:${w(gap)};background:var(--pos)"></span></div></div>`;
   $('legend').innerHTML=[['var(--accent)',t.lgKr],['var(--ship)',t.lgShip],['var(--duty)',t.lgDuty],['var(--trans)',t.lgTrans],['var(--pos)',t.lgGap]].map(([c2,l])=>`<span><i style="background:${c2}"></i>${l}</span>`).join('');
 }
-function enrich(){D.rows=D.cars.map(r=>{const k=cost(r[5],D.cost);return {mk:r[0],mo:r[1],y:r[2],f:r[3],km:r[4]*1000,usd:r[5],de:r[6],n:r[7],code:r[8],final:k.final,gap:r[6]-k.final}})}
+function enrich(){D.rows=D.cars.map(r=>{const k=cost(r[5],D.cost);return {mk:r[0],mo:r[1],y:r[2],f:r[3],km:r[4]*1000,usd:r[5],de:r[6],n:r[7],code:r[8],links:r[9]||[],final:k.final,gap:r[6]-k.final}})}
 function fillFilters(){
   const t=T[L],keep=id=>$(id).value;
   const mv=keep('f-make'),fv=keep('f-fuel'),yv=keep('f-year'),kv=keep('f-km'),bv=keep('f-budget');
@@ -294,7 +298,9 @@ function renderCards(rows){
   const t=T[L],top=[...rows].filter(r=>r.gap>0).sort((a,b)=>b.gap-a.gap).slice(0,24);
   $('cards').innerHTML=top.length?top.map(r=>`<div class="car"><div><div class="t">${D.makes[r.mk]} ${D.models[r.mo]}</div><div class="m">${r.y} · ${t.fuels[D.fuels[r.f]]} · ${fmtN(r.km)} km</div></div>
    <div class="nums"><span>${t.sFinal}</span><span>${fmtE(r.final)}</span><span>${t.sDe}</span><span>${fmtE(r.de)}</span><span>${t.sGap}</span><span class="gap-pos">${fmtSigned(r.gap)}</span></div>
-   <div class="m">${r.n} ${t.sComps} · ${fmtU(r.usd)} Korea</div><a href="https://mangoworldcar.com/${L}/car-detail/${r.code}" target="_blank" rel="noopener">${t.open} →</a></div>`).join(''):`<div class="empty">${t.none}</div>`;
+   <div class="m">${r.n} ${t.sComps} · ${fmtU(r.usd)} Korea</div>
+   <div class="links"><a href="https://mangoworldcar.com/${L}/car-detail/${r.code}" target="_blank" rel="noopener">${t.open} →</a>
+   ${r.links.length?`<div class="kgl"><span>${t.deLinks}</span>${r.links.map((id,i)=>`<a href="https://suchen.mobile.de/fahrzeuge/details.html?id=${id}" target="_blank" rel="noopener">${i+1}</a>`).join('')}</div>`:''}</div></div>`).join(''):`<div class="empty">${t.none}</div>`;
 }
 function renderNotes(){$('notes').innerHTML=T[L].notes(D).map(s=>`<p style="margin:0">${s}</p>`).join('')}
 function renderAll(){applyText();renderCalc();if(!D)return;const rows=filtered();renderKpis(rows);renderPanels(rows);renderModels(rows);renderCards(rows);renderNotes()}
