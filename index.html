@@ -300,7 +300,7 @@ function renderCards(rows){
   $('cards').innerHTML=top.length?top.map(r=>`<div class="car"><div><div class="t">${D.makes[r.mk]} ${D.models[r.mo]}</div><div class="m">${r.y} · ${t.fuels[D.fuels[r.f]]} · ${fmtN(r.km)} km</div></div>
    <div class="nums"><span>${t.sFinal}</span><span>${fmtE(r.final)}</span><span>${t.sDe}</span><span>${fmtE(r.de)}</span><span>${t.sGap}</span><span class="gap-pos">${fmtSigned(r.gap)}</span></div>
    <div class="m">${r.n} ${t.sComps} · ${fmtU(r.usd)} Korea</div>
-   <div class="links"><a href="https://mangoworldcar.com/${L}/car-detail/${r.code}" target="_blank" rel="noopener">${t.open} →</a>
+   <div class="links"><a href="https://mangoworldcar.com/en/car-detail/${r.code}" target="_blank" rel="noopener">${t.open} →</a>
    ${r.links.length?`<div class="kgl"><span>${t.deLinks}</span><span class="chips">${r.links.map((id,i)=>`<a href="https://suchen.mobile.de/fahrzeuge/details.html?id=${id}" target="_blank" rel="noopener" aria-label="${t.deLinks} ${i+1}">${i+1} ↗</a>`).join('')}</span></div>`:''}</div></div>`).join(''):`<div class="empty">${t.none}</div>`;
 }
 function renderNotes(){$('notes').innerHTML=T[L].notes(D).map(s=>`<p style="margin:0">${s}</p>`).join('')}
